@@ -1,66 +1,68 @@
-# Web-Scrape Case Study
-
-## Overview
-Develop a scraper to extract all campground locations across the United States from The Dyrt https://thedyrt.com/search by leveraging their map interface which exposes latitude/longitude data through API requests when the mouse moves. You're free to use any library you want (requests, httpx, selenium, playwright)
-For questions please connect us via email at info@smart-maple.com
-
-**Hint:** Look for a search endpoint in the network tab!
-
 ## Core Requirements
-- We provided a Docker compose file, you need to connect to PostgreSQL, create the necessary fields/tables (15p)
-- Scrape all campground data from the US map interface and store it in the database (30p)
-- Validate the data with pydantic, you can check the necessary fields from src/models/campground.py (these fields are the required fields to store in the db) (15p)
-- Scheduling: Cron-like scheduling for regular updates (15p)
-- Update: update existing records if they exist. (10p)
-- Error handling: handle errors in your code, especially HTTP errors, aand add retries if necessary (15p)
+
+* A Docker Compose file is provided; you need to connect to PostgreSQL and create the necessary fields/tables.
+* Scrape all campground data from the US map interface and store it in the database.
+* Validate the data with Pydantic. You can check the required fields in `src/models/campground.py` (these are the fields that must be stored in the DB).
+* **Scheduling**: Set up cron-like scheduling for regular updates. (15p)
+* **Update**: Update existing records if they already exist. (10p)
+* **Error Handling**: Handle errors in your code, especially HTTP errors, and add retries if necessary.
 
 ## Bonus
-- Database: Use an ORM for PostgreSQL operations
-- Logging: Comprehensive logging system
-- API Endpoint: Flask/FastAPI endpoint to trigger/control scraper 
-  (Hint: you can implement this in an async fashion)
-- Performance: Multithreading/async implementation
-- Find address from lat/long field
-- Feel free to use your creativity every additional field is appreciated
 
-## Scraper Optimizasyonu ve Grid Sistemi
-Bu projede ABD'deki tüm kamp alanlarını çekmek için grid sistemi yaklaşımı kullanılmıştır. Grid sistemi şu şekilde çalışır:
+* **Database**: Use an ORM for PostgreSQL operations.
+* **Logging**: Implement a comprehensive logging system.
+* **API Endpoint**: Provide a Flask/FastAPI endpoint to trigger/control the scraper.
+  *(Hint: You can implement this in an asynchronous way.)*
+* **Performance**: Use multithreading or asynchronous implementation.
+* **Reverse Geocoding**: Get the address from latitude/longitude coordinates.
+* Feel free to get creative — every additional field is appreciated!
 
-- Amerika Birleşik Devletleri'nin tüm coğrafi alanı 20x25 (500) grid hücresine bölünmüştür
-- Her bir grid hücresi için API istekleri yapılır ve o bölgedeki kamp alanları çekilir
-- Her grid hücresi için sayfalar tek tek işlenir ve her sayfada 500 kamp alanı çekilir
-- Grid durumu kaydedilir, böylece işlem kesintiye uğrarsa kaldığı yerden devam edebilir
-- Rate limiting ve API sınırlamalarına takılmamak için her istek arasında beklemeler vardır
+---
 
-## Kullanım
+## Scraper Optimization and Grid System
 
-Sistemi çalıştırmak için:
+In this project, a **grid system approach** is used to collect all campground data across the United States. The grid system works as follows:
+
+* The entire geographical area of the United States is divided into a 20x25 (500) grid of cells.
+* For each grid cell, API requests are made to collect campground data for that specific region.
+* Pages are processed one by one for each grid cell, retrieving 500 campgrounds per page.
+* Grid state is saved so that if the process is interrupted, it can resume from where it left off.
+* Delays are added between requests to avoid rate limiting and hitting API restrictions.
+
+---
+
+## Usage
+
+To run the system:
 
 ```bash
-# İlk açılış için 
+# For the initial setup
 docker-compose up -d --build
 
-# Docker konteynerları başlat
+# Start Docker containers
 docker-compose up -d
 
-# API endpoint üzerinden scraper'ı çalıştırma
+# Trigger the scraper via API endpoint
 curl -X POST http://localhost:8000/scrape/
 
-# İstatistikleri görüntüleme
+# View statistics
 curl http://localhost:8000/stats/
 ```
 
-Scraper çalışırken ilerlemesini terminal çıktısından takip edebilirsiniz:
+You can monitor the scraper’s progress via terminal output:
 
 ```
 docker-compose logs -f
 ```
 
-## Veritabanını Sıfırlama
+---
 
-Veritabanını tamamen sıfırlamak için:
+## Resetting the Database
+
+To completely reset the database:
 
 ```bash
 docker-compose down -v
 docker-compose up -d
 ```
+
